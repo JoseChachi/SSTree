@@ -2,13 +2,21 @@
 
 o/ 
 
-A huachafo implementation for points. 
+A huachafo SSTree implementation for points. 
 
-For running this project need to adjust the CMakeFile the SFML directory
+## Running
+
+For running this project, need to adjust the CMakeFile the SFML directory.
 ```asm
 set(SFML_DIR D:/SFML/lib/cmake/SFML)
 ```
 
-Then compile and indexing will execute. Adjust indexing.cpp as you wish :)
+You will need to set the embedding.json route file on function int main()
+```asm
+const std::string FILE_NAME("../embedding.json");
+```
 
-main.cpp aws just for testing
+Then compile and indexing will execute. Automatically it will create a file named embedding.dat (will take around 3 minutes). It is supossed to be there the SSTree. Adjust indexing.cpp as you wish :)
+
+
+main.cpp was just for testing
