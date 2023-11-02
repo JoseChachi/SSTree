@@ -363,25 +363,47 @@ void SsLeaf::updateBoundingEnvelope() {
         this->radius = maxDr;
     }
 
-
+    Point midPoint = Point(dims);
+    for(int i = 0; i < dims; i++){
+        for(const auto& dot: points){
+            midPoint[i] += dot[i];
+        }
+        midPoint[i] /= points.size();
+    }
     int k = 100;
     std::vector<NType> unitV;
-    NType distV;
+//    std::vector<NType> unitV2;
+//    std::vector<NType> unitV3;
+    NType distV, distV2, distV3;
     distV = distance(midMBB, maxDc);
+//    distV2 = distance(midPoint, maxDc);
+//    distV3 = distance(midMBB, midPoint);
     if(distV == 0) return;
-    NType res;
+//    if(distV2 == 0) return;
+//    if(distV3 == 0) return;
+    NType res, res2, res3;
     for(int i = 0; i < dims; i++){
         res = midMBB[i] - maxDc[i];
+//        res2 = midPoint[i] - maxDc[i];
+//        res3 = midMBB[i] - midPoint[i];
         unitV.push_back(res/distV);
+//        unitV2.push_back(res2/distV2);
+//        unitV3.push_back(res3/distV3);
     }
+
 
 
     for(int i = 1; i <= k; i++){
         Point newCenter = maxDc;
+//        Point newCenter2 = maxDc;
+//        Point newCenter3 = midPoint;
         NType newRadius = 0;
         for(int j = 0; j < dims; j++){
             newCenter[j] += unitV[j]*(distV/i);
+//            newCenter2[j] += unitV2[j]*(distV2/i);
+//            newCenter3[j] += unitV3[j]*(distV3/i);
         }
+
         for(const auto& dot: points){
             d = distance(newCenter, dot);
             if(d > newRadius) newRadius = d;
@@ -391,7 +413,26 @@ void SsLeaf::updateBoundingEnvelope() {
             this->radius = newRadius;
             this->centroid = newCenter;
         }
-
+//        newRadius = 0;
+//        for(const auto& dot: points){
+//            d = distance(newCenter2, dot);
+//            if(d > newRadius) newRadius = d;
+//        }
+//
+//        if(newRadius <= this->radius){
+//            this->radius = newRadius;
+//            this->centroid = newCenter2;
+//        }
+//        newRadius = 0;
+//        for(const auto& dot: points){
+//            d = distance(newCenter3, dot);
+//            if(d > newRadius) newRadius = d;
+//        }
+//
+//        if(newRadius <= this->radius){
+//            this->radius = newRadius;
+//            this->centroid = newCenter3;
+//        }
     }
 
 }
