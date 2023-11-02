@@ -354,7 +354,6 @@ void SsLeaf::updateBoundingEnvelope() {
         if(d <= r) continue;
         r = d;
     }
-
     if(r <= maxDr){
         this->centroid = midMBB;
         this->radius = r;
@@ -363,19 +362,35 @@ void SsLeaf::updateBoundingEnvelope() {
         this->centroid = maxDc;
         this->radius = maxDr;
     }
-//    std::cout << this->radius << std::endl;
-//    std::cout << r << std::endl;
 
-    int k = 1;
+
+    int k = 100;
     std::vector<NType> unitV;
-    d = distance(midMBB, maxDc);
-    if(d == 0) return;
+    NType distV;
+    distV = distance(midMBB, maxDc);
+    if(distV == 0) return;
     NType res;
     for(int i = 0; i < dims; i++){
         res = midMBB[i] - maxDc[i];
-        unitV.push_back(res/d);
+        unitV.push_back(res/distV);
     }
-    for(int i = 0; i < k; i++){
+
+
+    for(int i = 1; i <= k; i++){
+        Point newCenter = maxDc;
+        NType newRadius = 0;
+        for(int j = 0; j < dims; j++){
+            newCenter[j] += unitV[j]*(distV/i);
+        }
+        for(const auto& dot: points){
+            d = distance(newCenter, dot);
+            if(d > newRadius) newRadius = d;
+        }
+
+        if(newRadius <= this->radius){
+            this->radius = newRadius;
+            this->centroid = newCenter;
+        }
 
     }
 
@@ -430,21 +445,26 @@ std::pair<SsNode *, SsNode *> SsLeaf::split() {
 
 //    SsNode* newNode1 = new SsLeaf();
 //    SsNode* newNode2 = new SsLeaf();
-
+//
 //    int dims = this->centroid.dim();
 //    Point center1 = Point(dims);
 //    Point center2 = Point(dims);
-//    for(int i = 0; i < dims; i++){
-//        center1[i] = this->centroid[i] - (NType(sqrt(2)/2)*this->radius);
-//        center2[i] = this->centroid[i] + (NType(sqrt(2)/2)*this->radius);
+//    NType d, mx;
+//    for(const auto& pointA: this->points){
+//        for(const auto& pointB: this->points){
+//            d = distance(pointA, pointB);
+//            if(d > mx){
+//                mx = d;
+//                center1 = pointA;
+//                center2 = pointB;
+//            }
+//        }
 //    }
-////    std::cout << center1 << std::endl;
-////    std::cout << center2 << std::endl;
 //
 //    int iters = 0;
 //    int szG1, szG2;
 //    while(iters != 10){
-////        std::cout << "ITERRRRR\t" << iters << std::endl;
+//////        std::cout << "ITERRRRR\t" << iters << std::endl;
 //        //redo kmeans
 //        szG1 = 0; szG2 = 0;
 //
@@ -579,7 +599,9 @@ void SsTree::kNNQuery(const Point &target, size_t k, SsNode *node, NType radius,
                 }
                 this->kNNQuery(target, k, childNode, radius, result);
             }
-            this->kNNQuery(target, k, childNode, radius, result);
+
+            if(distance(target, childNode->centroid) + childNode->radius <= radius)
+                this->kNNQuery(target, k, childNode, radius, result);
         }
     }
     //si es hoja
